@@ -1,4 +1,6 @@
 
+import { NavLink } from "react-router-dom";
+
 import {
     LayoutDashboard,
     House,
@@ -8,6 +10,20 @@ import {
 } from "lucide-react";
 
 function Sidebar() {
+    // Estilo compartilhado para os links de navegação.
+    // O React Router identifica automaticamente a rota ativa.
+    const getNavLinkClass = ({ isActive }) => {
+        return `
+            flex items-center gap-3 rounded-lg px-3 py-2.5
+            text-sm font-medium transition-colors
+            ${
+                isActive
+                    ? "bg-primary text-primary-foreground"
+                    : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+            }
+        `;
+    };
+
     return (
         <aside className="hidden md:flex fixed inset-y-0 left-0 z-40 w-64 flex-col border-r bg-sidebar text-sidebar-foreground">
 
@@ -36,29 +52,31 @@ function Sidebar() {
 
                 <nav className="space-y-1">
 
-                    <a
-                        href="/"
-                        className="flex items-center gap-3 rounded-lg bg-primary px-3 py-2.5 text-sm font-medium text-primary-foreground"
+                    <NavLink
+                        to="/"
+                        end
+                        className={getNavLinkClass}
                     >
                         <LayoutDashboard size={18} />
                         Dashboard
-                    </a>
+                    </NavLink>
 
-                    <a
-                        href="/avaliar"
-                        className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+                    <NavLink
+                        to="/avaliar"
+                        className={getNavLinkClass}
                     >
                         <House size={18} />
                         Avaliar imóvel
-                    </a>
+                    </NavLink>
 
-                    <a
-                        href="/historico"
-                        className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+                    <NavLink
+                        to="/historico"
+                        className={getNavLinkClass}
                     >
                         <History size={18} />
                         Histórico
-                    </a>
+                    </NavLink>
+
                 </nav>
             </div>
 
