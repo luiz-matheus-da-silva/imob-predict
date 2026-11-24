@@ -15,6 +15,8 @@ services:
 
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      # Cria as tabelas na primeira vez que o banco é iniciado.
+      - ./backend/src/database/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
 
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U imobpredict -d imobpredict"]

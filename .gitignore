@@ -1,5 +1,35 @@
+# =====================================================
+# Segredos e configuração local
+# Nunca versionar senhas. Use os arquivos .env.example como modelo.
+# =====================================================
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+
+# Configurações locais de ferramentas de IA / editores
+.claude/settings.local.json
+.claude/*.local.*
+*.local
+
+# =====================================================
+# Dependências e builds
+# =====================================================
+node_modules/
+dist/
+build/
+coverage/
+.vite/
+.cache/
+*.tsbuildinfo
+
+# =====================================================
 # Logs
-logs
+# =====================================================
+logs/
 *.log
 npm-debug.log*
 yarn-debug.log*
@@ -7,21 +37,28 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-node_modules/
-dist/
-.env
-.env.*
-!.env.example
-.DS_Store
-*.local
+# =====================================================
+# Banco de dados local (dumps e volumes fora do Docker)
+# =====================================================
+*.sql.gz
+*.dump
+*.sqlite
+*.sqlite3
+postgres_data/
 
-backend/node_modules/
-backend/.env
-# Editor directories and files
+# =====================================================
+# Sistema operacional
+# =====================================================
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# =====================================================
+# Editores
+# =====================================================
 .vscode/*
 !.vscode/extensions.json
-.idea
-.DS_Store
+.idea/
 *.suo
 *.ntvs*
 *.njsproj

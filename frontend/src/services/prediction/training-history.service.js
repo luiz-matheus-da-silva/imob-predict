@@ -1,6 +1,4 @@
-
-const API_URL = "http://localhost:3000/api";
-
+import { API_URL } from "@/config/api";
 export async function getTrainingHistory() {
     const response = await fetch(`${API_URL}/training-runs`);
 

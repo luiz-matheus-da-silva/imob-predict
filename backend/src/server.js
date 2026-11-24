@@ -14,8 +14,14 @@ import trainingRunsRoutes from "./routes/training-runs.routes.js";
 const app = express();
 
 // Permite receber requisições do frontend React.
+// CORS_ORIGIN aceita várias origens separadas por vírgula.
+const allowedOrigins = (process.env.CORS_ORIGIN || "http://localhost:5173")
+    .split(",")
+    .map((origin) => origin.trim())
+    .filter(Boolean);
+
 app.use(cors({
-    origin: "http://localhost:5173"
+    origin: allowedOrigins
 }));
 
 // Permite interpretar requisições com JSON.
