@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/select";
 
 import { Checkbox } from "@/components/ui/checkbox";
-import { LoaderCircle, Calculator } from "lucide-react";
+import { LoaderCircle, Calculator, CircleAlert } from "lucide-react";
 
 const initialForm = {
     area: "",
@@ -27,8 +27,14 @@ const initialForm = {
     hasPool: false
 };
 
-function PropertyForm({ onEvaluate, isLoading }) {
+function PropertyForm({
+    onEvaluate,
+    isLoading,
+    neighborhoods = [],
+    conditions = []
+}) {
     const [formData, setFormData] = useState(initialForm);
+    const [validationError, setValidationError] = useState("");
 
     function handleChange(field, value) {
         setFormData((previous) => ({
@@ -39,6 +45,14 @@ function PropertyForm({ onEvaluate, isLoading }) {
 
     function handleSubmit(event) {
         event.preventDefault();
+
+        // Os selects não participam da validação nativa do navegador.
+        if (!formData.neighborhood || !formData.condition) {
+            setValidationError("Selecione o bairro e a condição do imóvel.");
+            return;
+        }
+
+        setValidationError("");
 
         onEvaluate({
             ...formData,
@@ -154,11 +168,11 @@ function PropertyForm({ onEvaluate, isLoading }) {
                                 </SelectTrigger>
 
                                 <SelectContent>
-                                    <SelectItem value="Centro">Centro</SelectItem>
-                                    <SelectItem value="Gleba Palhano">Gleba Palhano</SelectItem>
-                                    <SelectItem value="Jardim Aurora">Jardim Aurora</SelectItem>
-                                    <SelectItem value="Vila Ipiranga">Vila Ipiranga</SelectItem>
-                                    <SelectItem value="Bandeirantes">Bandeirantes</SelectItem>
+                                    {neighborhoods.map((item) => (
+                                        <SelectItem key={item} value={item}>
+                                            {item}
+                                        </SelectItem>
+                                    ))}
                                 </SelectContent>
                             </Select>
                         </div>
@@ -178,10 +192,11 @@ function PropertyForm({ onEvaluate, isLoading }) {
                                 </SelectTrigger>
 
                                 <SelectContent>
-                                    <SelectItem value="Novo">Novo</SelectItem>
-                                    <SelectItem value="Bom">Bom</SelectItem>
-                                    <SelectItem value="Regular">Regular</SelectItem>
-                                    <SelectItem value="Reformado">Reformado</SelectItem>
+                                    {conditions.map((item) => (
+                                        <SelectItem key={item} value={item}>
+                                            {item}
+                                        </SelectItem>
+                                    ))}
                                 </SelectContent>
                             </Select>
                         </div>
@@ -208,6 +223,16 @@ function PropertyForm({ onEvaluate, isLoading }) {
                         </div>
                     </div>
 
+                    {validationError && (
+                        <div
+                            role="alert"
+                            className="flex items-center gap-2 rounded-lg border border-destructive/40 p-3 text-sm text-destructive"
+                        >
+                            <CircleAlert className="size-4 shrink-0" />
+                            {validationError}
+                        </div>
+                    )}
+
                     <Button
                         type="submit"
                         className="w-full"
@@ -215,12 +240,12 @@ function PropertyForm({ onEvaluate, isLoading }) {
                     >
                         {isLoading ? (
                             <>
-                                <LoaderCircle className="mr-2 size-4 animate-spin" />
-                                Analisando imóvel...
+                                <LoaderCircle className="size-4 animate-spin" />
+                                Calculando estimativa...
                             </>
                         ) : (
                             <>
-                                <Calculator className="mr-2 size-4" />
+                                <Calculator className="size-4" />
                                 Estimar preço do imóvel
                             </>
                         )}

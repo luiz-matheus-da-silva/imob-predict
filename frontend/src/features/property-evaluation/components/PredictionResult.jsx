@@ -16,7 +16,8 @@ import {
     Car,
     Ruler,
     Calendar,
-    Waves
+    Waves,
+    TriangleAlert
 } from "lucide-react";
 
 const currency = new Intl.NumberFormat("pt-BR", {
@@ -74,15 +75,48 @@ function PredictionResult({ result }) {
                             Preço estimado do imóvel
                         </p>
 
-                        <h2 className="mt-2 text-4xl font-bold tracking-tight text-primary">
+                        <p className="mt-2 text-4xl font-bold tracking-tight text-primary tabular-nums">
                             {currency.format(result.price)}
-                        </h2>
+                        </p>
+
+                        {result.range ? (
+                            <p className="mt-3 text-sm text-muted-foreground">
+                                Faixa provável:{" "}
+                                <strong className="text-foreground">
+                                    {currency.format(result.range.low)} a {currency.format(result.range.high)}
+                                </strong>
+                            </p>
+                        ) : null}
 
                         <div className="mt-3 flex items-center gap-2 text-sm text-muted-foreground">
                             <TrendingUp size={16} />
-                            <span>Previsão gerada pelo modelo</span>
+                            <span>Previsão gerada pela rede neural treinada</span>
                         </div>
+
+                        <p className="mt-2 text-xs text-muted-foreground">
+                            {!result.saved
+                                ? "Não foi possível registrar esta avaliação no banco (API indisponível?)."
+                                : result.createdPropertyId
+                                    ? `Avaliação registrada. O imóvel foi salvo no cadastro como #${result.createdPropertyId}.`
+                                    : "Avaliação registrada no histórico do Dashboard."}
+                        </p>
                     </div>
+
+                    {result.warnings?.length > 0 && (
+                        <div
+                            role="alert"
+                            className="mt-4 space-y-1 rounded-lg border border-amber-500/40 bg-amber-500/10 p-3 text-xs text-amber-700 dark:text-amber-400"
+                        >
+                            <p className="flex items-center gap-2 font-medium">
+                                <TriangleAlert className="size-4 shrink-0" />
+                                Estimativa menos confiável
+                            </p>
+
+                            {result.warnings.map((warning) => (
+                                <p key={warning}>{warning}</p>
+                            ))}
+                        </div>
+                    )}
                 </CardContent>
             </Card>
 
@@ -128,7 +162,8 @@ function PredictionResult({ result }) {
 
             <p className="text-xs leading-relaxed text-muted-foreground">
                 Esta estimativa é gerada por um modelo de aprendizado de máquina
-                treinado com dados disponíveis no projeto. Não representa uma
+                treinado com dados disponíveis no projeto. A faixa provável usa o erro
+                médio medido nos dados de teste. Não representa uma
                 avaliação imobiliária oficial nem substitui a análise de um profissional.
             </p>
 
