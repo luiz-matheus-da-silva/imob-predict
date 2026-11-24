@@ -100,3 +100,61 @@ CREATE INDEX IF NOT EXISTS idx_evaluations_created_at
 
 CREATE INDEX IF NOT EXISTS idx_evaluations_model
     ON evaluations(model_version_id);
+
+
+-- =====================================================
+-- 5. HISTÓRICO DE TREINAMENTOS
+-- =====================================================
+
+CREATE TABLE IF NOT EXISTS training_runs (
+    id BIGSERIAL PRIMARY KEY,
+
+    model_version_id BIGINT,
+
+    status VARCHAR(20) NOT NULL DEFAULT 'pending',
+
+    epochs INTEGER NOT NULL DEFAULT 0,
+    training_samples INTEGER NOT NULL DEFAULT 0,
+    validation_samples INTEGER NOT NULL DEFAULT 0,
+    test_samples INTEGER NOT NULL DEFAULT 0,
+
+    mae NUMERIC,
+    mse NUMERIC,
+    loss NUMERIC,
+
+    error_message TEXT,
+
+    started_at TIMESTAMPTZ,
+    completed_at TIMESTAMPTZ,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+    CONSTRAINT fk_training_run_model
+        FOREIGN KEY (model_version_id)
+        REFERENCES model_versions(id),
+
+    CONSTRAINT training_runs_status_check
+        CHECK (status IN ('pending', 'running', 'completed', 'failed')),
+
+    CONSTRAINT training_runs_epochs_check
+        CHECK (epochs >= 0),
+
+    CONSTRAINT training_runs_samples_check
+        CHECK (
+            training_samples >= 0
+            AND validation_samples >= 0
+            AND test_samples >= 0
+        ),
+
+    CONSTRAINT training_runs_metrics_check
+        CHECK (
+            (mae IS NULL OR mae >= 0)
+            AND (mse IS NULL OR mse >= 0)
+            AND (loss IS NULL OR loss >= 0)
+        )
+);
+
+CREATE INDEX IF NOT EXISTS idx_training_runs_created_at
+    ON training_runs(created_at DESC);
+
+CREATE INDEX IF NOT EXISTS idx_training_runs_status
+    ON training_runs(status);
