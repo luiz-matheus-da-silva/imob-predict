@@ -11,4 +11,8 @@ router.get("/:id", propertyController.getById);
 
 router.post("/", propertyController.create);
 
+router.put("/:id", propertyController.update);
+
+router.delete("/:id", propertyController.remove);
+
 export default router;

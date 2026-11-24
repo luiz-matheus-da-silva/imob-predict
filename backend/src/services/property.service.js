@@ -105,3 +105,61 @@ export async function createProperty(property) {
 
   return propertyRepository.create(property);
 }
+
+// =====================================================
+// VALIDAR O IDENTIFICADOR
+// =====================================================
+
+function parseId(id) {
+  const propertyId = Number(id);
+
+  if (!Number.isSafeInteger(propertyId) || propertyId <= 0) {
+    throw createError("Identificador do imóvel inválido.", 400);
+  }
+
+  return propertyId;
+}
+
+// =====================================================
+// ATUALIZAR IMÓVEL
+// =====================================================
+
+export async function updateProperty(id, property) {
+  const propertyId = parseId(id);
+
+  validateProperty(property);
+
+  const updated = await propertyRepository.update(propertyId, property);
+
+  if (!updated) {
+    throw createError("Imóvel não encontrado.", 404);
+  }
+
+  return updated;
+}
+
+// =====================================================
+// EXCLUIR IMÓVEL
+// =====================================================
+
+export async function deleteProperty(id) {
+  const propertyId = parseId(id);
+
+  try {
+    const deleted = await propertyRepository.remove(propertyId);
+
+    if (!deleted) {
+      throw createError("Imóvel não encontrado.", 404);
+    }
+  } catch (error) {
+    // Violação de chave estrangeira: o imóvel já possui avaliações.
+    if (error.code === "23503") {
+      throw createError(
+        "Este imóvel possui avaliações registradas e não pode ser excluído.",
+        409
+      );
+    }
+
+    throw error;
+  }
+}

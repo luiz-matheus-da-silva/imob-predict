@@ -98,3 +98,63 @@ export async function create(property) {
 
   return result.rows[0];
 }
+
+// =====================================================
+// ATUALIZAR UM IMÓVEL
+// =====================================================
+
+export async function update(id, property) {
+  const query = `
+    UPDATE properties
+    SET
+      area = $1,
+      bedrooms = $2,
+      bathrooms = $3,
+      age = $4,
+      parking_spaces = $5,
+      neighborhood = $6,
+      condition = $7,
+      has_pool = $8
+    WHERE id = $9
+    RETURNING
+      id,
+      area,
+      bedrooms,
+      bathrooms,
+      age,
+      parking_spaces AS "parkingSpaces",
+      neighborhood,
+      condition,
+      has_pool AS "hasPool",
+      created_at AS "createdAt";
+  `;
+
+  const values = [
+    property.area,
+    property.bedrooms,
+    property.bathrooms,
+    property.age,
+    property.parkingSpaces,
+    property.neighborhood,
+    property.condition,
+    property.hasPool,
+    id
+  ];
+
+  const result = await database.query(query, values);
+
+  return result.rows[0] ?? null;
+}
+
+// =====================================================
+// EXCLUIR UM IMÓVEL
+// =====================================================
+
+export async function remove(id) {
+  const result = await database.query(
+    "DELETE FROM properties WHERE id = $1",
+    [id]
+  );
+
+  return result.rowCount > 0;
+}

@@ -51,3 +51,37 @@ export async function create(request, response, next) {
     next(error);
   }
 }
+
+// =====================================================
+// PUT /api/properties/:id
+// =====================================================
+
+export async function update(request, response, next) {
+  try {
+    const property = await propertyService.updateProperty(
+      request.params.id,
+      request.body
+    );
+
+    return response.status(200).json({
+      message: "Imóvel atualizado com sucesso.",
+      data: property
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+// =====================================================
+// DELETE /api/properties/:id
+// =====================================================
+
+export async function remove(request, response, next) {
+  try {
+    await propertyService.deleteProperty(request.params.id);
+
+    return response.status(204).send();
+  } catch (error) {
+    next(error);
+  }
+}

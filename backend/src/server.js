@@ -9,6 +9,7 @@ import healthRoutes from "./routes/health.routes.js";
 import propertyRoutes from "./routes/property.routes.js";
 import modelVersionRoutes from "./routes/model-version.routes.js";
 import evaluationRoutes from "./routes/evaluation.routes.js";
+import trainingRunsRoutes from "./routes/training-runs.routes.js";
 
 const app = express();
 
@@ -20,11 +21,11 @@ app.use(cors({
 // Permite interpretar requisições com JSON.
 app.use(express.json());
 
-// Rota de verificação da aplicação.
 app.use("/api/health", healthRoutes);
 app.use("/api/properties", propertyRoutes);
 app.use("/api/evaluations", evaluationRoutes);
-    
+app.use("/api/training-runs", trainingRunsRoutes);
+
 // =====================================================
 // TRATAMENTO GLOBAL DE ERROS
 // =====================================================

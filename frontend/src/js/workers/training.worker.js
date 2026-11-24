@@ -8,6 +8,13 @@ import { createTrainingContext } from "../neural-network/preprocessing.js";
 import { encodeProperty } from "../neural-network/encoding.js";
 import { createModel } from "../neural-network/model.js";
 
+// ============================================================
+// CONFIGURAÇÕES
+// ============================================================
+
+const EPOCHS = 100;
+const BATCH_SIZE = 32;
+
 // Impede que dois treinamentos sejam executados simultaneamente.
 let isTraining = false;
 
@@ -53,8 +60,8 @@ async function trainModel(trainingData, validationData) {
         trainingData.inputs,
         trainingData.outputs,
         {
-            epochs: 100,
-            batchSize: 32,
+            epochs: EPOCHS,
+            batchSize: BATCH_SIZE,
             shuffle: true,
 
             validationData: [
@@ -100,21 +107,17 @@ async function executeTraining() {
     let model;
 
     try {
-        self.postMessage({
-            type: "training-started"
-        });
-
         await tf.ready();
 
         // 1. Divide os dados em treinamento, validação e teste.
         const datasets = splitData(properties);
 
-        // 2. Aprende os parâmetros somente com treinamento.
+        // 2. Aprende os parâmetros somente com os dados de treinamento.
         const trainingContext = createTrainingContext(
             datasets.training
         );
 
-        // 3. Prepara os três conjuntos.
+        // 3. Prepara os três conjuntos de dados.
         trainingData = createTrainingData(
             datasets.training,
             trainingContext
@@ -130,13 +133,40 @@ async function executeTraining() {
             trainingContext
         );
 
-        // 4. Treina a rede neural.
+        // 4. Informa à aplicação que o treinamento começou.
+        // O backend utilizará esses dados para criar o histórico.
+        // Aguarda autorização da aplicação principal para iniciar.
+        self.postMessage({
+            type: "training-ready",
+            epochs: EPOCHS,
+            trainingSamples: datasets.training.length,
+            validationSamples: datasets.validation.length,
+            testSamples: datasets.test.length
+        });
+
+        await new Promise((resolve, reject) => {
+            const handleAuthorization = event => {
+                if (event.data?.type === "training-authorized") {
+                    self.removeEventListener("message", handleAuthorization);
+                    resolve();
+                }
+
+                if (event.data?.type === "training-cancelled") {
+                    self.removeEventListener("message", handleAuthorization);
+                    reject(new Error("Treinamento cancelado."));
+                }
+            };
+
+            self.addEventListener("message", handleAuthorization);
+        });
+
+        // 5. Treina a rede neural.
         model = await trainModel(
             trainingData,
             validationData
         );
 
-        // 5. Avalia com os dados de teste.
+        // 6. Avalia exclusivamente com os dados de teste.
         const evaluationResults = model.evaluate(
             testData.inputs,
             testData.outputs
@@ -157,14 +187,16 @@ async function executeTraining() {
         // Libera os tensores da avaliação.
         testTensors.forEach(tensor => tensor.dispose());
 
-        // 6. Salva o modelo treinado no IndexedDB.
+        // 7. Salva o modelo treinado no IndexedDB.
         const saveResult = await model.save(
             "indexeddb://imobpredict-model"
         );
 
-        // 7. Envia o contexto e as métricas para a aplicação.
+        // 8. Envia o resultado para a aplicação principal.
         self.postMessage({
             type: "training-finished",
+
+            epochs: EPOCHS,
 
             trainingContext,
 
@@ -175,6 +207,8 @@ async function executeTraining() {
             },
 
             trainingSamples: datasets.training.length,
+            validationSamples: datasets.validation.length,
+            testSamples: datasets.test.length,
 
             modelInfo: {
                 modelName: "imobpredict-model",
@@ -187,7 +221,7 @@ async function executeTraining() {
     } catch (error) {
         self.postMessage({
             type: "training-error",
-            message: error.message
+            message: error.message || "Erro durante o treinamento."
         });
 
     } finally {

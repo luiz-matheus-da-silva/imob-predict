@@ -9,6 +9,7 @@ export function useModelTraining() {
   const [logs, setLogs] = useState([]);
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
+  const [plan, setPlan] = useState(null);
 
   const startTraining = useCallback(() => {
     if (status === "training") {
@@ -19,6 +20,7 @@ export function useModelTraining() {
     setLogs([]);
     setResult(null);
     setError(null);
+    setPlan(null);
 
     try {
       workerRef.current = createTrainingWorker({
@@ -28,6 +30,17 @@ export function useModelTraining() {
               ...previous,
               { message: "Treinamento iniciado." }
             ]);
+          }
+
+          if (data.type === "training-registered") {
+            const run = data.trainingRun;
+
+            setPlan({
+              epochs: run.epochs,
+              trainingSamples: run.training_samples,
+              validationSamples: run.validation_samples,
+              testSamples: run.test_samples
+            });
           }
 
           if (data.type === "training-log") {
@@ -67,6 +80,7 @@ export function useModelTraining() {
     logs,
     result,
     error,
+    plan,
     startTraining
   };
 }
