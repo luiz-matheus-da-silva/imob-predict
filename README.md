@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # ImobPredict
 
 **Real Estate Price Prediction with JavaScript and TensorFlow.js**
@@ -166,7 +165,3 @@ This project uses synthetic data for educational purposes. Its predictions are n
 ## License
 
 This project is currently intended for educational and experimental purposes. Luiz Matheus.
-=======
-# imob-predict
-A real estate price prediction application built with JavaScript and TensorFlow.js, using a neural network trained on property features.
->>>>>>> 8f167d47a81061057741c595e621bb7d2520eb4e
